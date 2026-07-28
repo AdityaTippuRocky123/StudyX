@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Base custom classes to match the Clean Minimalism theme aesthetics */
+body {
+  background-color: #050505;
+  color: #f4f4f5;
+}
+
+/* Premium micro transitions and glassmorphism scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glassmorphic card styling matching the design template */
+.minimal-card {
+  background-color: rgba(24, 24, 27, 0.5); /* bg-zinc-900/50 */
+  border: 1px solid rgba(63, 63, 70, 0.4); /* border-zinc-700/40 */
+  border-radius: 24px; /* rounded-3xl */
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.minimal-card:hover {
+  border-color: rgba(234, 179, 8, 0.3); /* subtle yellow border glow */
+}
+
+/* Glass background ambient light */
+.ambient-glow-yellow {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: rgba(250, 204, 21, 0.04);
+  filter: blur(100px);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+
