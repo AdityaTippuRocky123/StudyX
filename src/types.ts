@@ -1,61 +1,9 @@
 export interface Subject {
-  id: string; // 'physics' | 'chemistry' | 'maths' or custom
-  name: string; // Physics / Chemistry / Maths
-  color?: string; // hex color code
-  targetHours?: number;
-}
-
-export type ChemistryGroup = 'Physical' | 'Inorganic' | 'Organic';
-
-export interface Chapter {
   id: string;
-  subjectId: string;
   name: string;
-  group?: ChemistryGroup; // Physical / Inorganic / Organic (Chemistry only)
-  order: number;
+  color: string; // hex color code
+  targetHours: number;
 }
-
-export interface ChapterPYQ {
-  2022: boolean;
-  2023: boolean;
-  2024: boolean;
-  2025: boolean;
-  2026: boolean;
-}
-
-export interface ChapterProgress {
-  chapterId: string;
-  percentDone: number; // 0 - 100
-  pyq: ChapterPYQ;
-  notes: string;
-  completed?: boolean; // derived: percentDone >= 90 and at least one PYQ year ticked
-}
-
-export interface StudySession {
-  id: string;
-  date: string; // YYYY-MM-DD
-  startTime: string; // ISO string or time string
-  durationMin: number; // duration in minutes
-  subjectId: string;
-  chapterId?: string; // optional
-  source: 'timer' | 'manual';
-  notes?: string;
-  // Backwards compatibility with TimerSession
-  duration?: number; // duration in seconds
-  type?: 'focus' | 'short_break' | 'long_break';
-}
-
-export interface Todo {
-  id: string;
-  text: string;
-  done: boolean;
-  createdAt: string; // ISO
-  subjectId?: string;
-  chapterId?: string;
-}
-
-// Backwards compatibility for existing views
-export type TimerSession = StudySession;
 
 export interface StudyLog {
   id: string;
@@ -74,7 +22,6 @@ export interface Task {
   completed: boolean;
   order: number;
   estimatedDuration?: number; // in minutes
-  chapterId?: string;
 }
 
 export interface TestMark {
@@ -111,6 +58,14 @@ export interface Achievement {
   description: string;
   unlockedAt: string | null; // Date ISO string or null
   icon: string; // Lucide icon identifier
+}
+
+export interface TimerSession {
+  id: string;
+  duration: number; // in seconds
+  date: string; // ISO or YYYY-MM-DD
+  subjectId: string;
+  type: 'focus' | 'short_break' | 'long_break';
 }
 
 export interface AppSettings {

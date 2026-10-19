@@ -39,11 +39,13 @@ import StudyXLogo from './components/StudyXLogo';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Leaderboard from './components/Leaderboard';
-import { useStudyData } from './context/useStudyData';
-import { SEED_SUBJECTS } from './data/seedData';
 
-// Default initial state data for Phase 1
-const DEFAULT_SUBJECTS: Subject[] = SEED_SUBJECTS;
+// Default initial state data for premium user presentation
+const DEFAULT_SUBJECTS: Subject[] = [
+  { id: 'sub-1', name: 'Calculus II', color: '#EAB308', targetHours: 30 },
+  { id: 'sub-2', name: 'Operating Systems', color: '#8B5CF6', targetHours: 25 },
+  { id: 'sub-3', name: 'Artificial Intelligence', color: '#10B981', targetHours: 20 },
+];
 
 const DEFAULT_LOGS: StudyLog[] = [
   { id: 'log-1', subjectId: 'sub-1', date: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString().slice(0, 10), hours: 2.5, notes: 'Studied limit theorems and practicing sequences.' },
@@ -93,8 +95,6 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 export default function App() {
-  const { streak, todayTotalHours, addSession, deleteSession, subjects: studySubjects } = useStudyData();
-
   // Authentication states
   const [user, setUser] = useState<any | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('studyx_auth_token'));
@@ -480,30 +480,11 @@ export default function App() {
 
   // State modification callbacks
   const handleAddLog = (newLog: Omit<StudyLog, 'id'>) => {
-    const logId = `log-${Date.now()}`;
     const logItem: StudyLog = {
       ...newLog,
-      id: logId
+      id: `log-${Date.now()}`
     };
     setLogs(prev => [...prev, logItem]);
-
-    // Phase 2 Integration: Also record as a StudySession with source: 'manual'
-    // so dashboard total hours, streak, heatmap, and study logs graph all update immediately!
-    const durationMin = Math.round(newLog.hours * 60);
-    const sessionObj: TimerSession = {
-      id: `sess-${logId}`,
-      date: newLog.date,
-      startTime: `${newLog.date}T12:00:00.000Z`,
-      durationMin: Math.max(1, durationMin),
-      duration: Math.max(1, durationMin) * 60,
-      subjectId: newLog.subjectId,
-      source: 'manual',
-      type: 'focus',
-      notes: newLog.notes
-    };
-    addSession(sessionObj);
-    setSessions(prev => [sessionObj, ...prev]);
-
     triggerConfetti();
   };
 
@@ -511,24 +492,11 @@ export default function App() {
     const item = logs.find(l => l.id === id);
     if (item) {
       setLogs(prev => prev.filter(l => l.id !== id));
-      deleteSession(`sess-${id}`);
-      deleteSession(id);
-      setSessions(prev => prev.filter(s => s.id !== `sess-${id}` && s.id !== id));
       triggerUndoToast('log', item);
     }
   };
 
   const handleAddSession = (sessionItem: TimerSession) => {
-    addSession({
-      durationMin: sessionItem.durationMin || (sessionItem.duration ? Math.round(sessionItem.duration / 60) : 0),
-      duration: sessionItem.duration,
-      date: (sessionItem.date || new Date().toISOString()).slice(0, 10),
-      startTime: sessionItem.date || new Date().toISOString(),
-      subjectId: sessionItem.subjectId,
-      chapterId: sessionItem.chapterId,
-      source: 'timer',
-      type: 'focus'
-    });
     setSessions(prev => {
       const idx = prev.findIndex(s => s.id === sessionItem.id);
       if (idx >= 0) {
@@ -843,8 +811,8 @@ export default function App() {
             <div className="flex items-center gap-2 px-1.5">
               <Flame size={15} className="text-yellow-500" />
               <div className="text-xs">
-                <p className="font-semibold">{streak} Day Streak</p>
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-mono">Consecutive Study (&gt;60m)</p>
+                <p className="font-semibold">{streakDays} Day Streak</p>
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-mono">Consecutive Study</p>
               </div>
             </div>
 
@@ -900,12 +868,12 @@ export default function App() {
             <div className="flex items-center gap-3">
               <div className="hidden md:flex items-center gap-1.5 bg-zinc-950/60 border border-zinc-900 px-3 py-1.5 rounded-full text-[11px] text-zinc-400 font-medium">
                 <Clock size={12} />
-                <span>Today: {todayTotalHours.decimal}h</span>
+                <span>Today: {(logs.filter(l => l.date === new Date().toISOString().slice(0, 10)).reduce((acc, l) => acc + l.hours, 0) + (sessions.filter(s => s.date.startsWith(new Date().toISOString().slice(0, 10)) && s.type === 'focus').reduce((acc, sess) => acc + sess.duration / 3600, 0))).toFixed(1)}h</span>
               </div>
 
               <div className="flex md:hidden bg-yellow-500 text-black px-2.5 py-1.5 rounded-full text-xs font-bold items-center gap-1 shadow-md shadow-yellow-500/10 animate-fade-in">
                 <Flame size={12} />
-                <span>{streak}d</span>
+                <span>{streakDays}d</span>
               </div>
 
               <button
@@ -921,19 +889,26 @@ export default function App() {
           {/* Primary View content body layout */}
           <main id="view-content-canvas" className="p-6 md:p-8 flex-grow">
             {view === 'dashboard' && (
-              <Dashboard setView={setView} />
+              <Dashboard
+                subjects={subjects}
+                logs={logs}
+                tasks={tasks}
+                tests={tests}
+                goals={goals}
+                sessions={sessions}
+                streakDays={streakDays}
+                notes={notes}
+                setView={setView}
+              />
             )}
             {view === 'timer' && (
-              <div className="space-y-6">
-                <Timer
-                  subjects={studySubjects}
-                  settings={settings}
-                  onAddSession={handleAddSession}
-                  sessions={sessions}
-                />
-              </div>
+              <Timer
+                subjects={subjects}
+                settings={settings}
+                onAddSession={handleAddSession}
+                sessions={sessions}
+              />
             )}
-
             {view === 'logs' && (
               <StudyLogs
                 subjects={subjects}
@@ -954,7 +929,14 @@ export default function App() {
               />
             )}
             {view === 'subjects' && (
-              <Subjects />
+              <Subjects
+                subjects={subjects}
+                logs={logs}
+                tests={tests}
+                sessions={sessions}
+                onAddSubject={handleAddSubject}
+                onDeleteSubject={handleDeleteSubject}
+              />
             )}
             {view === 'tests' && (
               <TestMarks

@@ -123,7 +123,7 @@ async function startServer() {
   // Connect to MongoDB
   await connectDB();
 
-  console.log("Mongo URI:", process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/:([^:@]+)@/, ":****@") : undefined);
+  console.log("Mongo URI:", process.env.MONGODB_URI);
   console.log("Mongoose readyState:", mongoose.connection.readyState);
 
   // Middleware for parsing JSON requests
