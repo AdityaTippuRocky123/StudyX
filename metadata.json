@@ -1,0 +1,6 @@
+{
+  "name": "StudyX",
+  "description": "A premium, dark-themed responsive Study Dashboard Web App with a focus-mode Study Timer, interactive charts, subject trackers, calendar view, logs, and settings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
